@@ -13,7 +13,7 @@ public class PickableTool : PickableBase
         }
     }
 
-    protected override void OnPickedUP()
+    protected override void OnPickedUp()
     {
         //nuh uh
     }

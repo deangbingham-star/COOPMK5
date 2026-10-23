@@ -12,7 +12,7 @@ public abstract class PickableBase : NetworkBehaviour, IInteractable
     [SerializeField] private SelectionOutline m_outline;
     [SerializeField] private ObjectType m_ObjectType;
 
-
+    public bool CanBePickedUp => m_isAvailable.Value;   
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -34,24 +34,29 @@ public abstract class PickableBase : NetworkBehaviour, IInteractable
 
     protected abstract void ApplyAvailabilityState(bool newvalue);
 
-    public void Pickup()
+    public void PickUp()
     {
         if(IsServer == false)
         {
             return;
         }
         m_isAvailable.Value = false;
-        OnPickedUP();
+        OnPickedUp();
     }
 
-    protected abstract void OnPickedUP();
+    protected abstract void OnPickedUp();
   
 
-    public void ToggleSeclection(bool isSelected)
+    public void ToggleSelection(bool isSelected)
     {
       if (m_outline != null)
         {
             m_outline.ToggleOutline(isSelected);
         }
     }
+
+
 }
+
+
+// CanBePickedUp
