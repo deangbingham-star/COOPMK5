@@ -1581,7 +1581,7 @@ MonoBehaviour:
   m_detectionAngle: 60
   m_pickupLayer:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 72
 --- !u!1 &987404082
 GameObject:
   m_ObjectHideFlags: 0
