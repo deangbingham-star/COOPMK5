@@ -19,6 +19,11 @@ public class PlayerController : NetworkBehaviour
     private AnimationEvents m_animationEvents;
 
     private bool m_isInteracting;
+    [SerializeField]
+    private GameObject m_axeModel, m_pickAxeModel, m_woodModel, m_stoneModel;
+
+    private NetworkVariable<ulong> m_heldNetworkObjectid = new(ulong.MaxValue);
+    private NetworkVariable<ObjectType> m_heldObjectType = new(ObjectType.None);
 
     private void OnEnable()
     {
@@ -51,12 +56,30 @@ public class PlayerController : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         m_interactionDetector.Initialize(IsOwner);
+        m_heldObjectType.OnValueChanged += HandleHeldItemChanged;
+        HandleItemJoin();
 
         if(IsOwner)
         {
             m_animationEvents.OnInteract += HandleInteractAction;
             m_animationEvents.OnAnimationDone += HandleAnimationDone;
         }
+    }
+
+    private void HandleItemJoin()
+    {
+        if(m_heldObjectType.Value != ObjectType.None)
+        {
+            HandleHeldItemChanged(ObjectType.None, m_heldObjectType.Value);
+        }
+    }
+
+    private void HandleHeldItemChanged(ObjectType previousValue, ObjectType newValue)
+    {
+        m_axeModel.SetActive(newValue == ObjectType.Axe);
+        m_pickAxeModel.SetActive(newValue == ObjectType.PickAxe);
+        m_woodModel.SetActive(newValue == ObjectType.Wood);
+        m_stoneModel.SetActive(newValue == ObjectType.Stone);
     }
 
     private void HandleAnimationDone()
@@ -87,15 +110,55 @@ public class PlayerController : NetworkBehaviour
         {
             return;
         }
+        if(m_heldObjectType.Value != ObjectType.None)
+        {
+            DropCurrentItem();
+        }
+        if(pickableItem is PickableTool)
+        {
+            m_heldNetworkObjectid.Value = networkObjectId;
+        }
+
+        m_heldObjectType.Value = pickableItem.ObjectType;
+
         pickableItem.PickUp();
+    }
+
+    private void DropCurrentItem()
+    {
+        if(IsServer == false)
+        {
+            return;
+        }
+        if(m_heldObjectType.Value == ObjectType.None)
+        {
+            m_heldNetworkObjectid.Value = ulong.MaxValue;
+            return;
+        }
+        if(m_heldObjectType.Value is ObjectType.Axe or ObjectType.PickAxe)
+        {
+            if(NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(m_heldNetworkObjectid.Value, out NetworkObject target))
+            {
+                if(target.TryGetComponent(out PickableTool pickableItem))
+                {
+                    pickableItem.Drop(transform.position);
+                }
+            }
+        }
+        m_heldObjectType.Value = ObjectType.None;
+        m_heldNetworkObjectId.Value = ulong.MaxValue;
     }
 
     public override void OnNetworkDespawn()
     {
+        m_heldObjectType.OnValueChanged -= HandleHeldItemChanged;
         if (IsOwner)
         {
+            m_animationEvents.OnInteract -= HandleInteractAction;
 
+            m_animationEvents.OnAnimationDone -= HandleAnimationDone;
         }
+        base.OnNetworkDespawn();
     }
 
     private void Update()
@@ -111,4 +174,4 @@ public class PlayerController : NetworkBehaviour
 }
 
 
-// CanBePickedUp
+// ObjectType

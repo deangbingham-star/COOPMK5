@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 2718348111763920972}
   - component: {fileID: 7847646816437756765}
   - component: {fileID: 8685077767177041700}
+  - component: {fileID: -6886186881652588147}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -124,7 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1644261858
+  GlobalObjectIdHash: 1523344893
   InScenePlacedSourceGlobalObjectIdHash: 0
   m_InScenePlacedDisabledByDefault: 0
   DeferredDespawnTick: 0
@@ -169,6 +170,9 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   m_playerInput: {fileID: 2718348111763920972}
   m_agentMover: {fileID: 6895321537121219383}
+  m_interactionDetector: {fileID: 0}
+  m_animator: {fileID: 0}
+  m_animationEvents: {fileID: 0}
 --- !u!114 &8685077767177041700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,6 +219,19 @@ MonoBehaviour:
   SwitchTransformSpaceWhenParented: 0
   Interpolate: 1
   SlerpPosition: 0
+--- !u!114 &-6886186881652588147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1855797244298458106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47e34514d4262c0438d9425d75e30053, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &2275305539792632927
 GameObject:
   m_ObjectHideFlags: 0
