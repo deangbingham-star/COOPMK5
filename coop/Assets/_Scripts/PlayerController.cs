@@ -14,6 +14,8 @@ public class PlayerController : NetworkBehaviour
 
     [SerializeField]
     private Animator m_animator;
+
+    [SerializeField]
     private AnimationEvents m_animationEvents;
 
     private bool m_isInteracting;
