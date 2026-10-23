@@ -4,6 +4,7 @@ using UnityEngine;
 
 public abstract class PickableBase : NetworkBehaviour, IInteractable
 {
+    
     //public NetworkObject NetworkObject => throw new System.NotImplementedException();
     protected NetworkVariable<bool> m_isAvailable = new(
        true,
@@ -47,11 +48,12 @@ public abstract class PickableBase : NetworkBehaviour, IInteractable
     protected abstract void OnPickedUP();
   
 
-    public void ToggleSeclection(bool isSelected)
+    public void ToggleSelection(bool isSelected)
     {
       if (m_outline != null)
         {
             m_outline.ToggleOutline(isSelected);
         }
     }
+
 }
