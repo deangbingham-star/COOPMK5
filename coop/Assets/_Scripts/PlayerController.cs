@@ -1,6 +1,7 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -18,7 +19,7 @@ public class PlayerController : NetworkBehaviour
     [SerializeField]
     private AnimationEvents m_animationEvents;
 
-    private bool m_isInteracting;
+    private bool m_isInteracting, m_isChopping;
     [SerializeField]
     private GameObject m_axeModel, m_pickAxeModel, m_woodModel, m_stoneModel;
 
@@ -28,6 +29,25 @@ public class PlayerController : NetworkBehaviour
     private void OnEnable()
     {
         m_playerInput.OnPickUpPressed += HandlePickupPressed;
+        m_playerInput.OnInteractPressed += HandleActionPressed;
+    }
+
+    private void HandleActionPressed()
+    {
+        if(IsOwner == false)
+        {
+            return;
+        }
+        if(m_isChopping || m_isInteracting)
+        {
+            return;
+        }
+        if(m_heldObjectType.Value is ObjectType.Axe or ObjectType.PickAxe)
+        {
+            m_isChopping = true;
+            m_animator.SetTrigger("Chop");
+        }
+
     }
 
     private void HandlePickupPressed()
@@ -49,6 +69,7 @@ public class PlayerController : NetworkBehaviour
     private void OnDisable()
     {
         m_playerInput.OnPickUpPressed -= HandlePickupPressed;
+        m_playerInput.OnInteractPressed -= HandleActionPressed;
     }
 
 
@@ -63,6 +84,7 @@ public class PlayerController : NetworkBehaviour
         {
             m_animationEvents.OnInteract += HandleInteractAction;
             m_animationEvents.OnAnimationDone += HandleAnimationDone;
+            m_animationEvents.OnChop += HandleChopAction;
         }
     }
 
@@ -146,7 +168,7 @@ public class PlayerController : NetworkBehaviour
             }
         }
         m_heldObjectType.Value = ObjectType.None;
-        m_heldNetworkObjectId.Value = ulong.MaxValue;
+        m_heldNetworkObjectid.Value = ulong.MaxValue;
     }
 
     public override void OnNetworkDespawn()
@@ -154,11 +176,43 @@ public class PlayerController : NetworkBehaviour
         m_heldObjectType.OnValueChanged -= HandleHeldItemChanged;
         if (IsOwner)
         {
+            RequestDropServerRpc();
             m_animationEvents.OnInteract -= HandleInteractAction;
-
             m_animationEvents.OnAnimationDone -= HandleAnimationDone;
+            m_animationEvents.OnChop -= HandleChopAction;
         }
         base.OnNetworkDespawn();
+    }
+
+    private void HandleChopAction()
+    {
+        if(m_heldObjectType.Value is ObjectType.Axe or ObjectType.PickAxe)
+        {
+            if(m_interactionDetector.ClosestInteractable is ResourceNode)
+            {
+                RequestResourceNodeInteractionServerRpc(m_interactionDetector.ClosestInteractable.NetworkObject.NetworkObjectId);
+            }
+        }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestResourceNodeInteractionServerRpc(ulong networkObjectId)
+    {
+        if(!NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject target))
+        {
+            return;
+        }
+        if(!target.TryGetComponent(out ResourceNode node))
+        {
+            return;
+        }
+        node.Harvest(m_heldObjectType.Value);
+    }
+
+    [Rpc(SendTo.Server)]
+    private void RequestDropServerRpc()
+    {
+        DropCurrentItem();
     }
 
     private void Update()

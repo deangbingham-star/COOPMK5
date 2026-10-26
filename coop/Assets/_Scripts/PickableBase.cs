@@ -11,9 +11,10 @@ public abstract class PickableBase : NetworkBehaviour, IInteractable
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server);
     [SerializeField] private SelectionOutline m_outline;
-    [SerializeField] private ObjectType m_ObjectType;
+    [SerializeField] private ObjectType m_objectType;
 
     public bool CanBePickedUp => m_isAvailable.Value;
+    public ObjectType ObjectType => m_objectType;
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
@@ -61,4 +62,4 @@ public abstract class PickableBase : NetworkBehaviour, IInteractable
 
 
 
-// CanBePickedUp
+// ObjectType
