@@ -52,7 +52,7 @@ public class PlayerController : NetworkBehaviour
 
     private void HandlePickupPressed()
     {
-        if(m_isInteracting)
+        if(m_isInteracting || m_isChopping)
         {
             return;
         }
@@ -107,6 +107,7 @@ public class PlayerController : NetworkBehaviour
     private void HandleAnimationDone()
     {
         m_isInteracting = false;
+        m_isChopping = false;
     }
 
     private void HandleInteractAction()
@@ -222,6 +223,10 @@ public class PlayerController : NetworkBehaviour
             return;
         }
         Vector2 movementInput = m_playerInput.MovementInput;
+        if(m_isChopping || m_isInteracting)
+        {
+            movementInput = Vector2.zero;
+        }
         m_agentMover.Move(movementInput);
     }
 
